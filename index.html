@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html ng-app="img-list" ng-strict>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Infinite Scroll Test</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style type="text/css" media="screen">
+      img {
+        margin: 0;
+        padding: 0;
+      }
+
+      .list-inline > li {
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body ng-controller="ImageCntrl as vm">
+    <div class="fluid-container">
+      <div class="col-sm-12">
+        <!-- <h1>Stats</h1> -->
+
+        <br />
+        <pre>
+STATISTIC
+=========
+Total Image: {{ ::vm.images.length }}
+Image Limit: {{ vm.limit }}
+        </pre>
+
+        <ul class="list-inline">
+          <li ng-repeat="img in vm.images | limitTo: vm.limit">
+            <img ng-src="{{ ::img }}" alt="{{ ::img }}" height="200px"/>
+          </li>
+        </ul>
+        <button class="btn btn-default" ng-click="vm.loadMore()">Load more..</button>
+
+      </div>
+    </div>
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      var app = angular.module('img-list', []);
+
+      app.controller('ImageCntrl', function($scope, $http, $window) {
+        var vm = this;
+        vm.limit = 50;
+        vm.counter = 20;
+
+        // var pathname, directory;
+        // pathname = window.location.pathname;
+        // pathname = pathname.substr(0, pathname.length-1);
+        // directory = pathname.substr(pathname.lastIndexOf('/') + 1);
+        // vm.total = vm.images.length;
+
+        vm.loadMore = function() {
+          if (vm.limit < vm.images.length) {
+            vm.limit += 20;
+            if (vm.limit > vm.images.length) { vm.limit = vm.images.length }
+          }
+        };
+
+        // $http.get('../dynamic_api.php')
+        //   .success(function( data ) {
+        //     vm.images = data;
+        //     console.log(data)
+        //   });
+        // Get pathname
+        var pathName = window.location.pathname;
+        var lastSegment = null;
+
+        // Check if we even have a pathname
+        if (pathName.length > 1) {
+
+          // Check if last char is '/' and remove it if so
+          if (pathName.substr(-1) == '/') {
+            pathName = pathName.substr(0, pathName.length - 1);
+          }
+
+          // Take the last index of '/' and +1 to skip the '/'
+          lastSegment = pathName.substr(pathName.lastIndexOf('/') + 1);
+
+          // return it
+          // return lastSegment
+        } else {
+
+          lastSegment = -1;
+          // return error if no path
+          // return -1
+        }
+
+        console.log(lastSegment);
+        $http.get('../dynamic_api.php?directory=' + lastSegment)
+        // $http.post('../dynamic_api.php', { directory: lastSegment })
+          .success(function( data ) {
+            vm.images = data;
+            console.log(data)
+          });
+
+        angular.element($window).bind("scroll", function() {
+          var windowHeight = "innerHeight" in window ? window.innerHeight : document.documentElement.offsetHeight;
+          var body = document.body;
+          var html = document.documentElement;
+          var docHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+          var windowBottom = windowHeight + window.pageYOffset;
+          if (windowBottom >= docHeight) {
+            $scope.$apply(function() {
+              vm.loadMore();
+            });
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
