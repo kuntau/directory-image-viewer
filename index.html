@@ -68,6 +68,7 @@ Image Limit: {{ vm.limit }}
         //     console.log(data)
         //   });
         // Get pathname
+        var hostName = window.location.hostname;
         var pathName = window.location.pathname;
         var lastSegment = null;
 
@@ -75,12 +76,16 @@ Image Limit: {{ vm.limit }}
         if (pathName.length > 1) {
 
           // Check if last char is '/' and remove it if so
+          // So far, work with our without the trailing '/'
           if (pathName.substr(-1) == '/') {
             pathName = pathName.substr(0, pathName.length - 1);
           }
 
           // Take the last index of '/' and +1 to skip the '/'
-          lastSegment = pathName.substr(pathName.lastIndexOf('/') + 1);
+          lastSegment = pathName.substr(pathName.indexOf('/') + 1);
+
+          // Take the last index of '/' and +1 to skip the '/'
+          // lastSegment = pathName.substr(pathName.lastIndexOf('/') + 1);
 
           // return it
           // return lastSegment
@@ -91,12 +96,19 @@ Image Limit: {{ vm.limit }}
           // return -1
         }
 
-        console.log(lastSegment);
-        $http.get('../dynamic_api.php?directory=' + lastSegment)
+        console.log(pathName);
+        console.log(hostName);
+        // $http.get('../dynamic_api.php?directory=' + lastSegment)
         // $http.post('../dynamic_api.php', { directory: lastSegment })
+        // $http.get(hostName + '/api.php?directory=' + lastSegment)
+        $http.get(`http://${hostName}/api.php?directory=${lastSegment}`)
           .success(function( data ) {
-            vm.images = data;
+            // vm.images = data;
             console.log(data)
+            vm.images = data.filter((el, index, arr) => {
+              let regex = /\.(png|gif|jpeg|jpg)$/g;
+              return regex.test(el);
+            });
           });
 
         angular.element($window).bind("scroll", function() {
