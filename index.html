@@ -31,7 +31,9 @@ Image Limit: {{ vm.limit }}
 
         <ul class="list-inline">
           <li ng-repeat="img in vm.images | limitTo: vm.limit">
-            <img ng-src="{{ ::img }}" alt="{{ ::img }}" height="200px"/>
+            <a href="{{ ::img }}" target="_blank">
+              <img ng-src="{{ ::img }}" alt="{{ ::img }}" height="200px"/>
+            </a>
           </li>
         </ul>
         <button class="btn btn-default" ng-click="vm.loadMore()">Load more..</button>
